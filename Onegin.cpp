@@ -10,8 +10,12 @@ struct Data_Str
     size_t Len_Str;
 };
 
+size_t Min_size_t (const size_t First, const size_t Second);
 int Strcmp_K (const char* const Str_1, const char* const Str_2);
 int Changed_Str (char* const Changeable_Str, const char* const Str);
+int Strcmp_Reverse_K (const char* const Str_1, const char* const Str_2);
+int Print_Array_Struct (const struct Data_Str* const Array_Struct, const size_t Quantity_Struct);
+int Sort_Array_Struct (struct Data_Str* const Array_Struct, const size_t Quantity_Struct, int (*Compare_Function) (const char* const Str_1, const char* const Str_2));
 
 int main ()
 {
@@ -37,17 +41,35 @@ int main ()
         Ptr_Last_Slash_N = Ptr_New_Slash_N + 1;
     }
 
-    for (int n = 0; n < N_Str_Mini_Onegin - 1; n++)
+    Sort_Array_Struct (Array_Struct, N_Str_Mini_Onegin, Strcmp_K);
+    Print_Array_Struct (Array_Struct, N_Str_Mini_Onegin);
+    printf ("\n\n");
+
+    Sort_Array_Struct (Array_Struct, N_Str_Mini_Onegin, Strcmp_Reverse_K);
+    Print_Array_Struct (Array_Struct, N_Str_Mini_Onegin);
+    printf ("\n\n");
+
+    printf ("%s", Buffer);
+    
+    close (Mini_Onegin);
+    free (Buffer);
+    return 0;
+}
+
+int Sort_Array_Struct (struct Data_Str* const Array_Struct, const size_t Quantity_Struct, int (*Compare_Function) (const char* const Str_1, const char* const Str_2))
+{
+    for (int n = 0; n < Quantity_Struct - 1; n++)
     {
-        for (size_t i = 0; i < (N_Str_Mini_Onegin -  1) - n; i++)
+        for (size_t i = 0; i < (Quantity_Struct -  1) - n; i++)
         {
             char* Str_1 = (char*) calloc(Array_Struct[i].Len_Str + 1, sizeof(char));
-            char* Str_2 = (char*) calloc(Array_Struct[i+1].Len_Str + 1, sizeof(char));
 
             for (size_t j = 0; j < Array_Struct[i].Len_Str; j++)
             {
                 Str_1[j] = (Array_Struct[i].Ptr_Str[j]);
             }
+
+            char* Str_2 = (char*) calloc(Array_Struct[i+1].Len_Str + 1, sizeof(char));
 
             for (size_t j = 0; j < Array_Struct[i+1].Len_Str; j++)
             {
@@ -55,7 +77,7 @@ int main ()
                 Str_2[j] = (Array_Struct[i+1].Ptr_Str[j]);
             }
 
-            if (Strcmp_K (Str_1, Str_2) > 0)
+            if ((*Compare_Function) (Str_1, Str_2) > 0)
             {
                 Data_Str Temporary = Array_Struct[i];
                 Array_Struct[i] = Array_Struct[i + 1];
@@ -67,19 +89,49 @@ int main ()
         }
     }
 
-    for (size_t i = 0; i < N_Str_Mini_Onegin; i++)
+    return 0;
+}
+int Strcmp_Reverse_K (const char* const Str_1, const char* const Str_2)
+{
+    assert (Str_1 != NULL);
+    assert (Str_2 != NULL);
+
+    const size_t Len_Str_1 = strlen (Str_1);
+    const size_t Len_Str_2 = strlen (Str_2);
+
+    char* Changeable_Str_1 = (char*) calloc(Len_Str_1 + 1, sizeof(char));
+    char* Changeable_Str_2 = (char*) calloc(Len_Str_2 + 1, sizeof(char));
+
+    Changed_Str (Changeable_Str_1, Str_1);
+    Changed_Str (Changeable_Str_2, Str_2);
+
+    const size_t Len_Changeable_Str_1 = strlen (Changeable_Str_1);
+    const size_t Len_Changeable_Str_2 = strlen (Changeable_Str_2);
+
+    for (size_t i = 0; i < Len_Changeable_Str_1 - 1; i++)
+    {
+        int Difference = (Changeable_Str_1[Len_Changeable_Str_1 - 1 - i] - Changeable_Str_2[Len_Changeable_Str_2 - 1 - i]);
+
+        if (Difference != 0)
+        {
+            return Difference;
+        }
+    }
+
+    return 0;
+}
+
+int Print_Array_Struct (const struct Data_Str* const Array_Struct, const size_t Quantity_Struct)
+{
+    for (size_t i = 0; i < Quantity_Struct; i++)
     {
         for (size_t j = 0; j < Array_Struct[i].Len_Str; j++)
         {
             putchar (Array_Struct[i].Ptr_Str[j]);
         }
     }
-
-    printf ("\n\n%s", Buffer);
-    close (Mini_Onegin);
-    free (Buffer);
     return 0;
- }
+}
 
 int Changed_Str (char* const Changeable_Str, const char* const Str)
 {
@@ -89,7 +141,7 @@ int Changed_Str (char* const Changeable_Str, const char* const Str)
     const size_t Len_Str = strlen (Str);
     size_t Changeable_Str_Index = 0;
 
-    for (size_t i = 0; i < Len_Str + 1; i++)
+    for (size_t i = 0; i < Len_Str; i++)
     {
         if ('A' <= Str[i] && Str[i] <= 'Z')
         {
@@ -123,10 +175,9 @@ int Strcmp_K (const char* const Str_1, const char* const Str_2)
     Changed_Str (Changeable_Str_1, Str_1);
     Changed_Str (Changeable_Str_2, Str_2);
 
-    const size_t Len_Str = strlen (Changeable_Str_1);
+    const size_t Len_Changeable_Str_1 = strlen (Changeable_Str_1);
 
-
-    for (size_t i = 0; i < Len_Str + 1; i++)
+    for (size_t i = 0; i < Len_Changeable_Str_1 + 1; i++)
     {
         int Difference = (Changeable_Str_1[i] - Changeable_Str_2[i]);
 
@@ -138,3 +189,4 @@ int Strcmp_K (const char* const Str_1, const char* const Str_2)
 
     return 0;
 }
+
